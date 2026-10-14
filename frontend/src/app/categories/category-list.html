@@ -1,0 +1,54 @@
+<section class="page narrow">
+  <header class="page-head">
+    <h1>Categories</h1>
+  </header>
+
+  <form class="inline-form" [formGroup]="form" (ngSubmit)="add()" novalidate>
+    <label class="field grow">
+      <span>New category</span>
+      <input type="text" formControlName="name" placeholder="For example, Garden" autocomplete="off" />
+    </label>
+    <button type="submit" class="btn btn-primary">Add category</button>
+  </form>
+
+  @if (error(); as message) {
+    <p class="notice notice-error" role="alert">{{ message }}</p>
+  }
+
+  @if (loading()) {
+    <p class="muted">Loading categories…</p>
+  } @else if (categories().length === 0) {
+    <div class="empty">
+      <p>No categories yet. Add one above to start organizing products.</p>
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Category</th>
+            <th scope="col" class="num">Products</th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (category of categories(); track category.id) {
+            <tr>
+              <td><span class="name">{{ category.name }}</span></td>
+              <td class="num">{{ category.productCount }}</td>
+              <td class="actions">
+                <button
+                  type="button"
+                  class="link danger"
+                  [disabled]="category.productCount > 0"
+                  [attr.title]="category.productCount > 0 ? 'Move or delete its products first' : null"
+                  (click)="remove(category)"
+                >Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

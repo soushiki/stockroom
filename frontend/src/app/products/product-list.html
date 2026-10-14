@@ -1,0 +1,117 @@
+<section class="page">
+  <header class="page-head">
+    <h1>Products</h1>
+    <a class="btn btn-primary" routerLink="/products/new">New product</a>
+  </header>
+
+  @if (summary(); as s) {
+    <dl class="figures">
+      <div>
+        <dt>Products</dt>
+        <dd>{{ s.totalProducts }}</dd>
+      </div>
+      <div>
+        <dt>Units in stock</dt>
+        <dd>{{ s.totalUnits }}</dd>
+      </div>
+      <div>
+        <dt>Inventory value</dt>
+        <dd>{{ s.inventoryValue | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</dd>
+      </div>
+      <div>
+        <dt>Low stock</dt>
+        <dd [class.warn]="s.lowStockCount > 0">{{ s.lowStockCount }}</dd>
+      </div>
+    </dl>
+  }
+
+  <div class="filters" role="search">
+    <label class="field grow">
+      <span>Search</span>
+      <input type="search" placeholder="Name or SKU" [value]="search()" (input)="onSearch($event)" />
+    </label>
+
+    <label class="field">
+      <span>Category</span>
+      <select (change)="onCategory($event)">
+        <option value="">All categories</option>
+        @for (category of categories(); track category.id) {
+          <option [value]="category.id" [selected]="category.id === categoryId()">{{ category.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="check">
+      <input type="checkbox" [checked]="lowStockOnly()" (change)="onLowStock($event)" />
+      <span>Low stock only</span>
+    </label>
+  </div>
+
+  @if (error(); as message) {
+    <p class="notice notice-error" role="alert">{{ message }}</p>
+  }
+
+  @if (loading() && products().length === 0) {
+    <p class="muted">Loading products…</p>
+  } @else if (products().length === 0) {
+    <div class="empty">
+      @if (filtersActive()) {
+        <p>No products match these filters. Clear the search or pick another category.</p>
+      } @else {
+        <p>No products yet.</p>
+        <a routerLink="/products/new">Add the first product</a>
+      }
+    </div>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Product</th>
+            <th scope="col">Category</th>
+            <th scope="col" class="num">Price</th>
+            <th scope="col">Stock</th>
+            <th scope="col"><span class="sr-only">Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (product of products(); track product.id) {
+            <tr>
+              <td>
+                <span class="name">{{ product.name }}</span>
+                <span class="sku">{{ product.sku }}</span>
+              </td>
+              <td>{{ product.categoryName }}</td>
+              <td class="num">{{ product.price | currency: 'COP' : 'symbol-narrow' : '1.0-0' }}</td>
+              <td>
+                <div class="stock" [class.low]="isLow(product)">
+                  <button
+                    type="button"
+                    class="step"
+                    [disabled]="product.stock === 0"
+                    [attr.aria-label]="'Remove one ' + product.name"
+                    (click)="adjust(product, -1)"
+                  >−</button>
+                  <span class="qty">{{ product.stock }}</span>
+                  <button
+                    type="button"
+                    class="step"
+                    [attr.aria-label]="'Add one ' + product.name"
+                    (click)="adjust(product, 1)"
+                  >+</button>
+                  <span class="meter" aria-hidden="true">
+                    <span [style.width.%]="level(product)"></span>
+                  </span>
+                </div>
+              </td>
+              <td class="actions">
+                <a [routerLink]="['/products', product.id, 'edit']">Edit</a>
+                <button type="button" class="link danger" (click)="remove(product)">Delete</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

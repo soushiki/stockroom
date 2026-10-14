@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: stockroom-db
+    environment:
+      POSTGRES_DB: inventory
+      POSTGRES_USER: inventory
+      POSTGRES_PASSWORD: inventory
+    ports:
+      - "5432:5432"
+    volumes:
+      - stockroom-data:/var/lib/postgresql/data
+
+volumes:
+  stockroom-data:
